@@ -24,7 +24,6 @@ class Message:
     retqueue: uuid.UUID
     schema: str
     epoch: time.struct_time
-    proxy: bool
     err: str
 
     def to_json(self):
@@ -40,7 +39,6 @@ class Message:
         "ret": self.retqueue,
         "shm": self.schema,
         "now": self.epoch,
-        "pxy": self.proxy,
         "err": self.err
     }
         return json.dumps(msg_dct)
@@ -60,12 +58,11 @@ class Message:
             msg_dict['ret'],
             msg_dict['shm'],
             msg_dict['now'],
-            msg_dict['pxy'],
             msg_dict['err'],
         ) 
 
 # init new message
-def new_message(command: str, twin_dst: list, data: dict = {}, expiration: int = 120, retry: int = 3, proxy: bool = False):
+def new_message(command: str, twin_dst: list, data: dict = {}, expiration: int = 120, retry: int = 3):
     version = 1
     id =  str(uuid.uuid4())
     twin_src = 0
@@ -73,7 +70,7 @@ def new_message(command: str, twin_dst: list, data: dict = {}, expiration: int =
     schema = ""
     epoch = int(time.time())
     err = ""
-    return Message(version, id, command, expiration, retry, data, twin_src, twin_dst, retqueue, schema, epoch, proxy, err)
+    return Message(version, id, command, expiration, retry, data, twin_src, twin_dst, retqueue, schema, epoch, err)
 
 def send_all(messages):
     responses_expected = 0
@@ -110,7 +107,7 @@ def wait_all(responses_expected, return_queues):
 
 
 def main():
-    msg = new_message("testme", [55], data = "GA7OPN4A3JNHLPHPEWM4PJDOYYDYNZOM7ES6YL3O7NC3PRY3V3UX6ANM", retry=3)
+    msg = new_message("testme", [41], data = "GA7OPN4A3JNHLPHPEWM4PJDOYYDYNZOM7ES6YL3O7NC3PRY3V3UX6ANM", retry=3)
     msgs = [msg] * 25
     start = timer()
     responses_expected, return_queues = send_all(msgs)
