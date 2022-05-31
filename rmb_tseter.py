@@ -1,15 +1,14 @@
 from dataclasses import dataclass
-from email import message
-from http.client import responses
-from urllib import response
 import uuid
 import time
 from timeit import default_timer as timer
 from alive_progress import alive_bar
-from alive_progress import alive_it
 import json
 import base64
 import redis
+import argparse
+import string    
+import random
 
 @dataclass
 class Message:
@@ -101,14 +100,17 @@ def wait_all(responses_expected, return_queues):
                 bar()
         return responses, err_count, success_count
 
-        
-        
-
-
-
 def main():
-    msg = new_message("testme", [41], data = "GA7OPN4A3JNHLPHPEWM4PJDOYYDYNZOM7ES6YL3O7NC3PRY3V3UX6ANM", retry=3)
-    msgs = [msg] * 25
+    parser = argparse.ArgumentParser("RMB_tester")
+    parser.add_argument("--dest", help="list of twin ids(integer) to send message/s to. (required at least one)", nargs='+', type=int, required=True)
+    parser.add_argument("--count", help="count of messages to send. defaults to 25.", type=int, default=25)
+    parser.add_argument("--command", help="command which will handle the message. defaults to 'testme'", type=str, default='testme')
+    parser.add_argument("--data", help="data to send. defaults to random chars.", type=str, default=''.join(random.choices(string.ascii_uppercase + string.digits, k = 56)) )
+    parser.add_argument("--retry", help="retry attempts. defaults to 3.", type=int, default=3)
+    args = parser.parse_args()
+    print(args)
+    msg = new_message(args.command, args.dest, data = args.data, retry=args.retry)
+    msgs = [msg] * args.count
     start = timer()
     responses_expected, return_queues = send_all(msgs)
     responses, err_count, success_count = wait_all(responses_expected, return_queues)
