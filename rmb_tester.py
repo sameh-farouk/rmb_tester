@@ -82,13 +82,15 @@ def send_all(messages):
             bar()
     return responses_expected, return_queues
 
-def wait_all(responses_expected, return_queues):
+def wait_all(responses_expected, return_queues, timeout=20):
         responses = []
         err_count = 0
         success_count = 0
         with alive_bar(responses_expected, title=f'Waiting ..', title_length=12) as bar:
             for i in range(responses_expected):
-                result = r.blpop(return_queues)
+                result = r.blpop(return_queues, timeout=timeout)
+                if not result:
+                    break
                 response = json.loads(result[1])
                 responses.append(response)
                 if response["err"]:
@@ -107,14 +109,17 @@ def main():
     parser.add_argument("--command", help="command which will handle the message. defaults to 'testme'", type=str, default='testme')
     parser.add_argument("--data", help="data to send. defaults to random chars.", type=str, default=''.join(random.choices(string.ascii_uppercase + string.digits, k = 56)) )
     parser.add_argument("--retry", help="retry attempts. defaults to 3.", type=int, default=3)
+    parser.add_argument("--timeout", help="client will give up waiting if no new message received during the amount of seconds. defaults to 20.", type=int, default=20)
+
     args = parser.parse_args()
     print(args)
     msg = new_message(args.command, args.dest, data = args.data, retry=args.retry)
     msgs = [msg] * args.count
     start = timer()
     responses_expected, return_queues = send_all(msgs)
-    responses, err_count, success_count = wait_all(responses_expected, return_queues)
+    responses, err_count, success_count = wait_all(responses_expected, return_queues, timeout=args.timeout)
     elapsed_time = timer() - start
+    no_responses = responses_expected - len(responses) 
     print("=======================")
     print("Summary:")
     print("=======================")
@@ -122,6 +127,7 @@ def main():
     print(f"expected_responses: {responses_expected}")
     print(f"received_success: {success_count}")
     print(f"received_errors: {err_count}")
+    print(f"no response errors (client give up): {no_responses}")
     print(f"elapsed time: {elapsed_time}")
     print("=======================")
     print("Responses:")
@@ -133,7 +139,8 @@ def main():
     print("=======================")
     for response in responses:
         if response["err"]:
-            print(response["err"])
+            print(f"Error: {response['err']}")
+            print(f"From Twin: {response['src']}")
         
 
 if __name__ == "__main__":
