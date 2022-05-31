@@ -1,7 +1,8 @@
-# rmb_tester
-for testing purposes, you can use either RMB_Tester or RMB_echo or both to quickly test communication between multiple RMB
+# RMB tools (CLI tools/scripts)
 
-## installation:
+for testing purposes. you can use either RMB_Tester or RMB_echo or both to quickly test communication between multiple [RMB](https://github.com/threefoldtech/rmb-rs).
+
+## Installation:
 - clone the repo
 - create a new env
 ```py
@@ -16,7 +17,10 @@ source ./venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## RMB_tester
+## Usage:
+RMB tools consists of two parts which can be used separately or combined.
+
+### RMB_tester
 will automate crafting number of messages to be sent to one or multiple destinations.
 the number of messages and the command, data, retry count and dest list are configurable through the command line. it will wait from the correct number of responses and report some statics. make sure there is a process running on dest side that can handle this command and respond back or use RMB_echo for this.
 
@@ -30,7 +34,7 @@ for all optional args see
 python3 ./rmb_tester.py -h
 ```
 
-## RMB_echo (message handler)
+### RMB_echo (message handler)
 will automate handling the messages coming to $queue and respond with same message back to the source.
 
 example:
