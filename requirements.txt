@@ -1,0 +1,2 @@
+alive-progress==2.4.1
+redis==4.3.1
