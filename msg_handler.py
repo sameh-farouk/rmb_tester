@@ -1,5 +1,5 @@
 import redis
-from rmb_tseter import Message
+from rmb_tester import Message
 import time
 import argparse
 
