@@ -8,7 +8,8 @@ def listen(q):
         result = r.blpop(f'msgbus.{q}')
         msg = Message.from_json(result[1])
         msg.epoch = int(time.time())
-        msg.twin_dst, msg.twin_src = msg.twin_src, msg.twin_dst
+        msg.twin_dst, msg.twin_src = [msg.twin_src], msg.twin_dst[0]
+        print(msg.twin_dst, msg.twin_src)
         r.lpush(msg.retqueue, msg.to_json())
 
 if __name__ == "__main__":
