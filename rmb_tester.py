@@ -104,16 +104,17 @@ def wait_all(responses_expected, return_queues, timeout=20):
 
 def main():
     parser = argparse.ArgumentParser("RMB_tester")
-    parser.add_argument("--dest", help="list of twin ids(integer) to send message/s to. (required at least one)", nargs='+', type=int, required=True)
-    parser.add_argument("--count", help="count of messages to send. defaults to 25.", type=int, default=25)
-    parser.add_argument("--command", help="command which will handle the message. defaults to 'testme'", type=str, default='testme')
+    parser.add_argument("-d", "--dest", help="list of twin ids(integer) to send message/s to. (required at least one)", nargs='+', type=int, required=True)
+    parser.add_argument("-n", "--count", help="count of messages to send. defaults to 25.", type=int, default=25)
+    parser.add_argument("-c", "--command", help="command which will handle the message. defaults to 'testme'", type=str, default='testme')
     parser.add_argument("--data", help="data to send. defaults to random chars.", type=str, default=''.join(random.choices(string.ascii_uppercase + string.digits, k = 56)) )
-    parser.add_argument("--retry", help="retry attempts. defaults to 3.", type=int, default=3)
-    parser.add_argument("--timeout", help="client will give up waiting if no new message received during the amount of seconds. defaults to 20.", type=int, default=20)
-
+    parser.add_argument("-r", "--retry", help="retry attempts. defaults to 3.", type=int, default=3)
+    parser.add_argument("-e", "--expiration", help="message expiration time in seconds. defaults to 120.", type=int, default=120)
+    parser.add_argument("-t", "--timeout", help="client will give up waiting if no new message received during the amount of seconds. defaults to 20.", type=int, default=20)
+    parser.add_argument("--short", help="omit responses output and shows only the stats.", action='store_true')
     args = parser.parse_args()
     print(args)
-    msg = new_message(args.command, args.dest, data = args.data, retry=args.retry)
+    msg = new_message(args.command, args.dest, data=args.data, expiration=args.expiration, retry=args.retry)
     msgs = [msg] * args.count
     start = timer()
     responses_expected, return_queues = send_all(msgs)
@@ -130,17 +131,18 @@ def main():
     print(f"no response errors (client give up): {no_responses}")
     print(f"elapsed time: {elapsed_time}")
     print("=======================")
-    print("Responses:")
-    print("=======================")
-    for response in responses:
-        print(response)
-    print("=======================")
-    print("Errors:")
-    print("=======================")
-    for response in responses:
-        if response["err"]:
-            print(f"Error: {response['err']}")
-            print(f"From Twin: {response['src']}")
+    if not args.short:
+        print("Responses:")
+        print("=======================")
+        for response in responses:
+            print(response)
+        print("=======================")
+        print("Errors:")
+        print("=======================")
+        for response in responses:
+            if response["err"]:
+                print(f"Error: {response['err']}")
+                print(f"From Twin: {response['src']}")
         
 
 if __name__ == "__main__":
