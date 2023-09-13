@@ -100,6 +100,7 @@ def wait_all(responses_expected, return_queues, timeout=20):
         return responses, err_count, success_count
 
 def main():
+    global r
     parser = argparse.ArgumentParser("RMB_tester")
     parser.add_argument("-d", "--dest", help="list of twin ids(integer) to send message/s to. (required at least one)", nargs='+', type=int, required=True)
     parser.add_argument("-n", "--count", help="count of messages to send. defaults to 25.", type=int, default=25)
@@ -108,7 +109,9 @@ def main():
     parser.add_argument("-e", "--expiration", help="message expiration time in seconds. defaults to 120.", type=int, default=120)
     parser.add_argument("-t", "--timeout", help="client will give up waiting if no new message received during the amount of seconds. defaults to 20.", type=int, default=20)
     parser.add_argument("--short", help="omit responses output and shows only the stats.", action='store_true')
+    parser.add_argument("-p", "--redis-port", help="redis port for the instance used by rmb-peer", type=int, default=6379)
     args = parser.parse_args()
+    r = redis.Redis(host='localhost', port=args.redis_port, db=0)
     # print(args)
     msg = new_message(args.command, args.dest, data=args.data, expiration=args.expiration)
     # print(msg.to_json())
@@ -144,5 +147,5 @@ def main():
 
 if __name__ == "__main__":
     NUM_RETRY = 3
-    r = redis.Redis(host='localhost', port=6379, db=0)
+    r = None
     main()

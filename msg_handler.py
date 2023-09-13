@@ -16,10 +16,11 @@ def listen(q):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("RMB_echo")
-    parser.add_argument("--queue", help="redis queue name. defaults to 'testme'",  type=str, default='testme')
+    parser.add_argument("-q", "--queue", help="redis queue name. defaults to 'testme'",  type=str, default='testme')
+    parser.add_argument("-p", "--redis-port", help="redis port for the instance used by rmb-peer", type=int, default=6380)
     args = parser.parse_args()
 
-    r = redis.Redis(host='localhost', port=6380, db=0)
+    r = redis.Redis(host='localhost', port=args.redis_port, db=0)
     print("RMB_echo")
     print(f"handling command msgbus.{args.queue}")
     listen(args.queue)
