@@ -13,63 +13,60 @@ import random
 @dataclass
 class Message:
     version: int
-    id: str
+    ref: str
     command: str
     expiration: int
-    retry: int
     data: str
-    twin_src: int
+    #tags: str
     twin_dst: list
-    retqueue: uuid.UUID
+    reply_to: uuid.UUID
     schema: str
     epoch: time.struct_time
-    err: str
+    err: dict
+    twin_src: string
 
     def to_json(self):
         msg_dct = {
         "ver": self.version,
-        "uid": self.id,
+        "ref": self.ref,
         "cmd": self.command,
         "exp": self.expiration,
-        "try": self.retry,
-        "dat": base64.encodebytes(self.data.encode('utf-8')).decode('utf-8'),
-        "src": self.twin_src,
+        "dat": base64.b64encode(self.data.encode('utf-8')).decode('utf-8'),
+        # "tag": self.tags,
         "dst": self.twin_dst,
-        "ret": self.retqueue,
+        "ret": self.reply_to,
         "shm": self.schema,
         "now": self.epoch,
-        "err": self.err
     }
         return json.dumps(msg_dct)
-    
+
     @classmethod
     def from_json(cls, json_data):
         msg_dict = json.loads(json_data)
         return cls(
-            msg_dict['ver'],
-            msg_dict['uid'],
-            msg_dict['cmd'],
-            msg_dict['exp'],
-            msg_dict['try'],
-            msg_dict['dat'],
-            msg_dict['src'],
-            msg_dict['dst'],
-            msg_dict['ret'],
-            msg_dict['shm'],
-            msg_dict['now'],
-            msg_dict['err'],
-        ) 
+            version=msg_dict.get('ver'),
+            ref=msg_dict.get('ref'),
+            command=msg_dict.get('cmd'),
+            expiration=msg_dict.get('exp'),
+            data=base64.b64decode(msg_dict.get('dat')).decode('utf-8'),
+            reply_to=msg_dict.get('ret'),
+            schema=msg_dict.get('shm'),
+            epoch=msg_dict.get('now'),
+            err= msg_dict.get('err'),
+            twin_src=msg_dict.get('src'),
+            twin_dst=msg_dict.get('dst')
+        )
 
 # init new message
-def new_message(command: str, twin_dst: list, data: dict = {}, expiration: int = 120, retry: int = 3):
+def new_message(command: str, twin_dst: list, data: dict = {}, expiration: int = 120):
     version = 1
-    id =  str(uuid.uuid4())
-    twin_src = 0
-    retqueue = str(uuid.uuid4())
-    schema = ""
+    reply_to = str(uuid.uuid4())
+    schema = "application/json"
     epoch = int(time.time())
-    err = ""
-    return Message(version, id, command, expiration, retry, data, twin_src, twin_dst, retqueue, schema, epoch, err)
+    err = {"code": 0, "message": ""}
+    ref = ""
+    # tags = ""
+    return Message(version, ref, command, expiration, data, twin_dst, reply_to, schema, epoch, err, "")
 
 def send_all(messages):
     responses_expected = 0
@@ -78,7 +75,7 @@ def send_all(messages):
         for msg in messages:
             r.lpush("msgbus.system.local", msg.to_json())
             responses_expected += len(msg.twin_dst)
-            return_queues += [msg.retqueue]
+            return_queues += [msg.reply_to]
             bar()
     return responses_expected, return_queues
 
@@ -91,14 +88,14 @@ def wait_all(responses_expected, return_queues, timeout=20):
                 result = r.blpop(return_queues, timeout=timeout)
                 if not result:
                     break
-                response = json.loads(result[1])
+                response = Message.from_json(result[1])
                 responses.append(response)
-                if response["err"]:
+                if response.err is not None:
                     err_count += 1
                     bar.text('received an error ❌')
                 else:
                     success_count += 1
-                    bar.text(f'received a response from twin {response["src"]} ✅')
+                    bar.text(f'received a response from twin {response.twin_src} ✅')
                 bar()
         return responses, err_count, success_count
 
@@ -108,13 +105,13 @@ def main():
     parser.add_argument("-n", "--count", help="count of messages to send. defaults to 25.", type=int, default=25)
     parser.add_argument("-c", "--command", help="command which will handle the message. defaults to 'testme'", type=str, default='testme')
     parser.add_argument("--data", help="data to send. defaults to random chars.", type=str, default=''.join(random.choices(string.ascii_uppercase + string.digits, k = 56)) )
-    parser.add_argument("-r", "--retry", help="retry attempts. defaults to 3.", type=int, default=3)
     parser.add_argument("-e", "--expiration", help="message expiration time in seconds. defaults to 120.", type=int, default=120)
     parser.add_argument("-t", "--timeout", help="client will give up waiting if no new message received during the amount of seconds. defaults to 20.", type=int, default=20)
     parser.add_argument("--short", help="omit responses output and shows only the stats.", action='store_true')
     args = parser.parse_args()
-    print(args)
-    msg = new_message(args.command, args.dest, data=args.data, expiration=args.expiration, retry=args.retry)
+    # print(args)
+    msg = new_message(args.command, args.dest, data=args.data, expiration=args.expiration)
+    # print(msg.to_json())
     msgs = [msg] * args.count
     start = timer()
     responses_expected, return_queues = send_all(msgs)
@@ -140,10 +137,10 @@ def main():
         print("Errors:")
         print("=======================")
         for response in responses:
-            if response["err"]:
+            if response.err is not None:
                 print(f"Error: {response['err']}")
                 print(f"From Twin: {response['src']}")
-        
+
 
 if __name__ == "__main__":
     NUM_RETRY = 3

@@ -29,6 +29,13 @@ example:
 python3 ./rmb_tester.py --dest 41 55
 ```
 
+to just print the summary use `--short` option
+
+to override default command use the `--command`
+```py
+python3 ./rmb_tester.py --dest 41 --command helloworld
+```
+
 for all optional args see
 ```py
 python3 ./rmb_tester.py -h
