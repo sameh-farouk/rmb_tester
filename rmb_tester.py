@@ -141,8 +141,8 @@ def main():
         print("=======================")
         for response in responses:
             if response.err is not None:
-                print(f"Error: {response['err']}")
-                print(f"From Twin: {response['src']}")
+                print(f"Error: {response.err}")
+                print(f"From Twin: {response.twin_src}")
 
 
 if __name__ == "__main__":
