@@ -79,7 +79,7 @@ def send_all(messages):
             bar()
     return responses_expected, return_queues
 
-def wait_all(responses_expected, return_queues, timeout=20):
+def wait_all(responses_expected, return_queues, timeout):
         responses = []
         err_count = 0
         success_count = 0
@@ -107,7 +107,7 @@ def main():
     parser.add_argument("-c", "--command", help="command which will handle the message. defaults to 'testme'", type=str, default='testme')
     parser.add_argument("--data", help="data to send. defaults to random chars.", type=str, default=''.join(random.choices(string.ascii_uppercase + string.digits, k = 56)) )
     parser.add_argument("-e", "--expiration", help="message expiration time in seconds. defaults to 120.", type=int, default=120)
-    parser.add_argument("-t", "--timeout", help="client will give up waiting if no new message received during the amount of seconds. defaults to 20.", type=int, default=20)
+    parser.add_argument("-t", "--timeout", help="client will give up waiting if no new message received during the amount of seconds. defaults to 20.", type=int, default=120)
     parser.add_argument("--short", help="omit responses output and shows only the stats.", action='store_true')
     parser.add_argument("-p", "--redis-port", help="redis port for the instance used by rmb-peer", type=int, default=6379)
     args = parser.parse_args()
