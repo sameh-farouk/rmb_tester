@@ -103,11 +103,11 @@ def main():
     global r
     parser = argparse.ArgumentParser("RMB_tester")
     parser.add_argument("-d", "--dest", help="list of twin ids(integer) to send message/s to. (required at least one)", nargs='+', type=int, required=True)
-    parser.add_argument("-n", "--count", help="count of messages to send. defaults to 25.", type=int, default=25)
+    parser.add_argument("-n", "--count", help="count of messages to send. defaults to 1.", type=int, default=1)
     parser.add_argument("-c", "--command", help="command which will handle the message. defaults to 'testme'", type=str, default='testme')
     parser.add_argument("--data", help="data to send. defaults to random chars.", type=str, default=''.join(random.choices(string.ascii_uppercase + string.digits, k = 56)) )
     parser.add_argument("-e", "--expiration", help="message expiration time in seconds. defaults to 120.", type=int, default=120)
-    parser.add_argument("-t", "--timeout", help="client will give up waiting if no new message received during the amount of seconds. defaults to 20.", type=int, default=120)
+    parser.add_argument("-t", "--timeout", help="client will give up waiting if no new message received during the amount of seconds. defaults to 120.", type=int, default=120)
     parser.add_argument("--short", help="omit responses output and shows only the stats.", action='store_true')
     parser.add_argument("-p", "--redis-port", help="redis port for the instance used by rmb-peer", type=int, default=6379)
     args = parser.parse_args()
@@ -118,6 +118,8 @@ def main():
     msgs = [msg] * args.count
     start = timer()
     responses_expected, return_queues = send_all(msgs)
+    if args.timeout < args.expiration:
+        print("Note: The timeout value you provided is less than the message expiration (TTL) value. As a result, responses may arrive after the client has given up waiting for them.")
     responses, err_count, success_count = wait_all(responses_expected, return_queues, timeout=args.timeout)
     elapsed_time = timer() - start
     no_responses = responses_expected - len(responses) 
