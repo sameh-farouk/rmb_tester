@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from dataclasses import dataclass
 import uuid
 import time
@@ -101,7 +103,7 @@ def wait_all(responses_expected, return_queues, timeout):
 
 def main():
     global r
-    parser = argparse.ArgumentParser("RMB_tester")
+    parser = argparse.ArgumentParser("RMB_tester", "python3 rmb_tester.py --dest 41 -c rmb.version")
     parser.add_argument("-d", "--dest", help="list of twin ids(integer) to send message/s to. (required at least one)", nargs='+', type=int, required=True)
     parser.add_argument("-n", "--count", help="count of messages to send. defaults to 1.", type=int, default=1)
     parser.add_argument("-c", "--command", help="command which will handle the message. defaults to 'testme'", type=str, default='testme')

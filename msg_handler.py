@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import redis
 from rmb_tester import Message
 import time
