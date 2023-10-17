@@ -67,5 +67,5 @@ python3 ./msg_handler.py -h
 - Test all online nodes (based on up reports) to ensure that they are reachable over RMB
 ```sh
 # The online_nodes.sh script will output the ids of the online nodes in the dev net using the gridproxy API.
-python3 rmb_tester.py --dest $(./scripts/online_nodes.sh) -c "rmb.version"
+python3 ./rmb_tester.py --dest $(./scripts/online_nodes.sh) -c "rmb.version"
 ```
