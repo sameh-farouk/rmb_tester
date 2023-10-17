@@ -58,3 +58,7 @@ for all optional args see
 ```py
 python3 ./msg_handler.py -h
 ```
+
+## Recipes:
+- Test all online nodes to ensure that they are reachable over RMB
+python3 rmb_tester.py --dest $(./scripts/nodes.sh) -c "rmb.version"
