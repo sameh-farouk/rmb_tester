@@ -146,7 +146,7 @@ def main():
         for response in responses:
             if response.err is not None:
                 print(f"Error: {response.err}")
-                print(f"From Twin: {response.twin_src}")
+                print(f"Source: {'Twin '+response.twin_src if response.twin_src != '0' else 'Relay'}")
 
 
 if __name__ == "__main__":
