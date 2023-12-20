@@ -133,6 +133,8 @@ def main():
     print(f"received_success: {success_count}")
     print(f"received_errors: {err_count}")
     print(f"no response errors (client give up): {no_responses}")
+    responding = {int(response.twin_src) for response in responses}
+    print(f"twins not responding (twin IDs): {set(args.dest) - responding}")
     print(f"elapsed time: {elapsed_time}")
     print("=======================")
     if not args.short:
