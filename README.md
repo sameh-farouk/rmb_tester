@@ -67,5 +67,22 @@ python3 ./msg_handler.py -h
 - Test all online nodes (based on up reports) to ensure that they are reachable over RMB
 ```sh
 # The nodes.sh script when used with `--likely-up` option will output the IDs of the online nodes in the network using the gridproxy API.
-python3 ./rmb_tester.py -d $(./scripts/twins.sh --likely-up main) -c "rmb.version" -t 500 -e 500
+python3 ./rmb_tester.py -d $(./scripts/twins.sh --likely-up main) -c "rmb.version" -t 600 -e 600
+```
+Note: this tool is for testing purposes and not optimized for speed, for large number of destinations use appropriate expiration and timeout values.
+
+you can copy and paste all non responsive twins and run `./twinid_to_nodeid.sh` with the list of twins ids for easy lookup node id and verfiying the status (like know if node in standby mode).
+```sh
+./scripts/twinid_to_nodeid.sh main 2562 5666 2086 2092
+```
+
+First arg is network (one of `dev`, `qa`, `test`, `main`)
+Then you follow it with space separated list of twin ids
+
+the output would be like
+```sh
+twin ID: 2562 node ID: 1419 status: up
+twin ID: 5666 node ID: 3568 status: up
+twin ID: 2086 node ID: 943 status: up
+twin ID: 2092 node ID: 949 status: up
 ```
