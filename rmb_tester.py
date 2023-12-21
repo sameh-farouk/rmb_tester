@@ -73,7 +73,7 @@ def new_message(command: str, twin_dst: list, data: dict = {}, expiration: int =
 def send_all(messages):
     responses_expected = 0
     return_queues = []
-    with alive_bar(len(messages), title=f'Sending ..', title_length=12) as bar:
+    with alive_bar(len(messages), title='Sending ..', title_length=12) as bar:
         for msg in messages:
             r.lpush("msgbus.system.local", msg.to_json())
             responses_expected += len(msg.twin_dst)
@@ -85,11 +85,13 @@ def wait_all(responses_expected, return_queues, timeout):
         responses = []
         err_count = 0
         success_count = 0
-        with alive_bar(responses_expected, title=f'Waiting ..', title_length=12) as bar:
-            for i in range(responses_expected):
+        with alive_bar(responses_expected, title='Waiting ..', title_length=12) as bar:
+            for _ in range(responses_expected):
+                start = timer()
                 result = r.blpop(return_queues, timeout=timeout)
                 if not result:
                     break
+                timeout = timeout - round(timer() - start, 3)
                 response = Message.from_json(result[1])
                 responses.append(response)
                 if response.err is not None:
@@ -134,7 +136,8 @@ def main():
     print(f"received_errors: {err_count}")
     print(f"no response errors (client give up): {no_responses}")
     responding = {int(response.twin_src) for response in responses}
-    print(f"twins not responding (twin IDs): {set(args.dest) - responding}")
+    not_responding = set(args.dest) - responding
+    print(f"twins not responding (twin IDs): {' '.join(map(str, not_responding))}")
     print(f"elapsed time: {elapsed_time}")
     print("=======================")
     if not args.short:
