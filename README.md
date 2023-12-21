@@ -67,5 +67,5 @@ python3 ./msg_handler.py -h
 - Test all online nodes (based on up reports) to ensure that they are reachable over RMB
 ```sh
 # The nodes.sh script when used with `--likely-up` option will output the IDs of the online nodes in the network using the gridproxy API.
-python3 ./rmb_tester.py -d $(./scripts/nodes.sh --likely-up main) -c "rmb.version" -t 500 -e 500
+python3 ./rmb_tester.py -d $(./scripts/twins.sh --likely-up main) -c "rmb.version" -t 500 -e 500
 ```

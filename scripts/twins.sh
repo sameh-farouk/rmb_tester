@@ -6,16 +6,16 @@ if [[ $# -gt 3 ]]; then
 fi
 
 case $1 in
-    --likely-up|--likely-down|--standby|-|"" )  # Ok
+    --likely-up|--likely-down|--standby|all )  # Ok
         ;;
     *)
         # The wrong first argument.
-        echo 'Expected "--likely-up", "--likely-down", "-" as first arg' >&2
+        echo 'Expected "--likely-up", "--likely-down", "--standby", "all" as first arg' >&2
         exit 1
 esac
 
 case $2 in
-    main|dev|qa|test|"" )  # Ok
+    main|dev|qa|test )  # Ok
         ;;
     *)
         # The wrong first argument.
@@ -25,13 +25,13 @@ esac
 
 case $3 in
     *[!0-9,]*)
-        echo 'Expected number or comma seprated list of numbers as third arg' >&2
+        echo 'Expected number or comma seprated list of farm numbers as third arg' >&2
         exit 1
         ;;
     *)
 esac
 
-if [[ "$2" == "main" || "$2" == "" ]]; then 
+if [[ "$2" == "main" ]]; then
   gridproxy_url="https://gridproxy.grid.tf"
 else
   gridproxy_url="https://gridproxy.$2.grid.tf"
