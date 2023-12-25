@@ -1,4 +1,5 @@
 # RMB tools (CLI tools/scripts)
+## NOTE : This repo is no longer maintained. please go instaed to https://github.com/threefoldtech/rmb-rs
 
 You can find here CLI tools and scripts that can be used for testing and benchmarking [RMB](https://github.com/threefoldtech/rmb-rs). You can use either RMB_Tester, RMB_echo, or both to quickly test the communications over RMB.
 
